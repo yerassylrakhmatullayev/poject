@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: RersistentVolumeClaim
+metadata:
+  name: mssql-claim
+spec: 
+  accessModes:
+    - ReadWriteMany
+  resources:
+     request:
+       storage: 200Mi
