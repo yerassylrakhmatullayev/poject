@@ -23,5 +23,9 @@ namespace CommandsService.Data
 
             modelBuilder
                 .Entity<Command>()
+                .HasOne(p => p.Platform)
+                .WithMany(p => p.Commands)
+                .HasForeignKey(p => p.Platform.Id);
         }
+    }
 }
