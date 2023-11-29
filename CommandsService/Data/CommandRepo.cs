@@ -1,6 +1,8 @@
 ﻿using CommandsService.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 
 namespace CommandsService.Data
 {
@@ -14,28 +16,40 @@ namespace CommandsService.Data
         }
         public void CreateCommand(int platformId, Command command)
         {
-            throw new System.NotImplementedException();
+            if (command == null) 
+            {
+                throw new ArgumentNullException(nameof(command));
+
+            }
+                command.PlatformId = platformId;
+            _context.Commands.Add(command);
         }
 
         public void CreatePlatform(Platform plat)
         {
-            throw new System.NotImplementedException();
+            if(plat == null)
+            {
+               throw new ArgumentNullException(nameof(plat));
+            }
+            _context.Platforms.Add(plat);
         }
 
         public IEnumerable<Platform> GetAllPlatforms()
         {
-            throw new System.NotImplementedException();
+            return _context.Platforms.ToList();
         }
 
         public Command GetCommand(int platformId, int commandId)
         {
-            throw new System.NotImplementedException();
+            return _context.Commands
+                .Where(c => c.PlatformId == platformId && c.Id == commandId).FirstOrDefault();
         }
 
         public IEnumerable<Command> GetCommandsForPlatform(int platformId)
         {
             return _context.Commands
-                .Where
+                .Where(c => c.PlatformId == platformId)
+                .OrderBy(c => c.Platform.Name);
         }
 
         public bool PlatformExits(int platformId)

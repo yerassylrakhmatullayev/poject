@@ -1,8 +1,11 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using PlatformService.Models;
-using PlatformService.Data;
+using CommandsService.Data;
+using AutoMapper;
+using System.Collections;
+using CommandsService.Dtos;
+using System.Collections.Generic;
 
 namespace CommandsService.Controllers
 {
@@ -10,11 +13,25 @@ namespace CommandsService.Controllers
 	[ApiController]
 	public class PlatformsController : ControllerBase
 	{
-        private 
+		private readonly ICommandRepo _repository;
+		private readonly IMapper _mapper;
 
-        public PlatformsController(IPlatformRepo repository, IMapper mapper,)
+		private 
+
+        public PlatformsController(ICommandRepo repository, IMapper mapper)
         {
-                
+            _repository = repository;
+            _mapper = mapper;
+        }
+        [HttpGet]
+        public ActionResult<IEnumerable<PlatformReadDto>> GetPlatforms() 
+        {
+            Console.WriteLine("--> Getting Platforms from CommandsService");
+
+            var platformItems = _repository.GetAllPlatforms();
+
+            return Ok(_mapper.Map<IEnumerable<PlatformReadDto>>(platformItems));
+
         }
 
         [HttpPost]
