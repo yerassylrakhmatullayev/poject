@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using PlatformService.Dtos;
 using RabbitMQ.Client;
@@ -9,7 +11,7 @@ namespace PlatformService.AsyncDataServices
     {
         private readonly IConfiguration _configuration;
         private readonly IConnection _connection;
-        private readonly object _channel;
+        private readonly IModel _channel;
 
         public MessageBusClient(IConfiguration configuration)
         {
@@ -28,7 +30,7 @@ namespace PlatformService.AsyncDataServices
 
                 _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
 
-                Console.WriteLine("--> Connecetd to MessageBus");
+                Console.WriteLine("--> Connected to MessageBus");
             }
             catch (Exception ex) 
             {
@@ -37,7 +39,39 @@ namespace PlatformService.AsyncDataServices
         }
         public void PublishNewPlatform(PlatformPublishedDto platformPublishedDto)
         {
-            throw new System.NotImplementedException();
+            var message = JsonSerializer.Serialize(platformPublishedDto);
+
+            if (_connection.IsOpen) 
+            {
+                Console.WriteLine("--> RabbitMQ Connection Open, sending message...");
+                SendMessage(message);
+            }
+            else
+            {
+                Console.WriteLine("--> RabbitMQ Connection Shutdown");
+            }
+
+        }
+
+        private void SendMessage(string message) 
+        {
+            var body = Encoding.UTF8.GetBytes(message);
+
+            _channel.BasicPublish(exchange: "trigger",
+                                  routingKey: "",
+                                  basicProperties: null,
+                                  body: body);
+            Console.WriteLine($"We have sent {message}");
+        }
+
+        public void Dispose()
+        {
+            Console.WriteLine("MessageBus Disposed");
+            if(_channel.IsOpen)
+            {
+                _channel.Close();
+                _connection.Close();
+            }
         }
 
         private void RabbitMQ_ConnectionShutdown(object sender, ShutdownEventArgs e) 
